@@ -8,12 +8,10 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-K = 3                                # scene detail (the scene is drawn on a 160K x 100K grid)
+K = 3                                
 W, H = 160 * K, 100 * K              # scene grid size in cells
 rng = np.random.default_rng(5)
 
-# every position below is written in the "old" 160 x 100 units, so changing K
-# only makes the scene finer without moving anything
 yy, xx = np.mgrid[0:H, 0:W] / K
 
 # ---------- ASCII screen settings ----------
@@ -69,9 +67,9 @@ bg[:] = SKY
 gem_id = np.full((H, W), -1)
 
 
-# ---------- a beautiful faceted diamond ----------
+# ---------- faceted diamond ----------
 def draw_gem(i, cx, cy, size, angle, base):
-    """Brilliant-cut diamond: table, crown facets, girdle, pavilion facets, glints."""
+    
     R = size * 1.6
     x0, x1 = max(0, int((cx - R) * K)), min(W, int((cx + R) * K) + 2)
     y0, y1 = max(0, int((cy - R) * K)), min(H, int((cy + R) * K) + 2)
@@ -81,13 +79,13 @@ def draw_gem(i, cx, cy, size, angle, base):
     v = (-(gx - cx) * s + (gy - cy) * c) / size
 
     crown = (v >= -1) & (v < -0.4)
-    wc = 0.6 + (v + 1) / 0.6 * 0.4                          # crown half-width
-    wp = np.maximum(1 - (v + 0.4) / 1.4, 1e-3)              # pavilion half-width
+    wc = 0.6 + (v + 1) / 0.6 * 0.4                          
+    wp = np.maximum(1 - (v + 0.4) / 1.4, 1e-3)              
     body = (crown & (abs(u) <= wc)) | ((v >= -0.4) & (v <= 1) & (abs(u) <= wp))
     if not body.any():
         return
 
-    # facet shading (light comes from the upper left)
+    # facet shading 
     ratio = np.where(crown, u / wc, u / wp)
     crown_shade = np.select([ratio < -0.55, ratio < -0.2, ratio < 0.2, ratio < 0.55],
                             [0.95, 1.20, 1.38, 0.95], 0.72)
@@ -146,8 +144,8 @@ bg[outline(inside, 1.0)] = DARK_BROWN
 for px, py in [(46, 90), (49, 89), (43, 91)]:
     bg[circle(px, py, 1.5)] = (0.55, 0.32, 0.14)
 
-# man (static parts)
-bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # pickaxe
+# man 
+bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # axe
 bg[line(35, 72, 46, 78, 1.5)] = (0.3, 0.3, 0.34)
 bg[rect(19, 80, 23, 91) | rect(25, 80, 29, 91)] = (0.08, 0.08, 0.1)          # legs
 bg[rect(18, 91, 23, 92) | rect(25, 91, 30, 92)] = (0, 0, 0)                  # shoes
@@ -173,7 +171,7 @@ def draw_scene(t):
     shade = 0.92 + 0.12 * np.sin(2 * t + gem_phase)
     img *= np.where(gem_id >= 0, shade[gem_id.clip(0)], 1.0)[:, :, None]
 
-    # blue <-> red light, flickering
+    # blue, red light, flickering
     mix = 0.5 + 0.5 * np.sin(2 * np.pi * t / 1.5)
     light = BLUE * (1 - mix) + RED * mix
     flicker = 0.7 + 0.3 * np.sin(2 * np.pi * 4 * t) ** 2
