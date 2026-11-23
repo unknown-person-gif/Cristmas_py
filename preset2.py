@@ -1,19 +1,19 @@
-# Man scrolling reels in a cave, diamonds outside  (fine dot-matrix grid, pixel-art diamonds)
+# Man scrolling reels in a cave 
 # pip install numpy matplotlib
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation                                          # WHAT ARE YOU LOOKING FOR :XD
 
-K = 3                                # grid detail: 1 = chunky, 2 = fine, 3 = very fine (set 2 if it lags)
+K = 3                                
 SCALE = 6 // K                       # screen pixels per grid cell
 W, H = 160 * K, 100 * K              # grid size in cells
 rng = np.random.default_rng(5)
 
 # every position below is written in the "old" 160 x 100 units, so changing K
-# only makes the grid finer without moving anything
-yy, xx = np.mgrid[0:H, 0:W] / K
+
+yy, xx = np.mgrid[0:H, 0:W] / K                         
 
 
 # ---------- small helpers ----------
@@ -64,7 +64,7 @@ gem_id = np.full((H, W), -1)
 
 # ---------- pixel-art diamonds ----------
 # o = outline, w = white shine, l = light, b = base, d = dark, . = empty
-# one character = one pixel (K x K grid cells)
+# one character = one pixel 
 SPRITES = [
     [  # big diamond
         "..oooooo..",
@@ -94,7 +94,7 @@ def draw_gem(i, cx, cy, sprite, base):
     pal = {"o": OUTLINE, "w": np.array((1.0, 1.0, 1.0)), "l": np.clip(base * 1.25, 0, 1),
            "b": base, "d": base * 0.68}
     h, w = len(sprite), len(sprite[0])
-    ox, oy = int(round(cx - w / 2)) * K, int(round(cy - h / 2)) * K     # snap to the pixel grid
+    ox, oy = int(round(cx - w / 2)) * K, int(round(cy - h / 2)) * K     # For snap to the pixel grid
     for r, row in enumerate(sprite):
         for c, ch in enumerate(row):
             if ch == ".":
@@ -114,7 +114,7 @@ inside = polygon([(-2, 52), (40, 48), (54, 52), (56, 66), (56, 92), (-2, 92)])
 gem_centers = []
 for gx in np.arange(4, 160, 12):
     for gy in np.arange(4, 100, 12):
-        if rng.random() < 0.15:                              # random gaps
+        if rng.random() < 0.15:                              # For random gaps
             continue
         cx, cy = gx + rng.uniform(-2, 2), gy + rng.uniform(-2, 2)
         if cx < 80 and cy > 28:                              # keep the cave area empty
@@ -134,8 +134,8 @@ bg[outline(inside, 1.0)] = DARK_BROWN
 for px, py in [(46, 90), (49, 89), (43, 91)]:
     bg[circle(px, py, 1.5)] = (0.55, 0.32, 0.14)
 
-# man (static parts)
-bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # pickaxe
+# man 
+bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # axe
 bg[line(35, 72, 46, 78, 1.5)] = (0.3, 0.3, 0.34)
 bg[rect(19, 80, 23, 91) | rect(25, 80, 29, 91)] = (0.08, 0.08, 0.1)          # legs
 bg[rect(18, 91, 23, 92) | rect(25, 91, 30, 92)] = (0, 0, 0)                  # shoes
@@ -157,11 +157,11 @@ HEART = np.kron(np.array([[0, 1, 0, 1, 0], [1, 1, 1, 1, 1], [0, 1, 1, 1, 0], [0,
 def draw_scene(t):
     img = bg.copy()
 
-    # diamonds shimmer
+    # diamonds 
     shade = 0.92 + 0.12 * np.sin(2 * t + gem_phase)
     img *= np.where(gem_id >= 0, shade[gem_id.clip(0)], 1.0)[:, :, None]
 
-    # blue <-> red light, flickering
+    # blue, red light, flickering
     mix = 0.5 + 0.5 * np.sin(2 * np.pi * t / 1.5)
     light = BLUE * (1 - mix) + RED * mix
     flicker = 0.7 + 0.3 * np.sin(2 * np.pi * 4 * t) ** 2
@@ -195,7 +195,7 @@ def draw_scene(t):
         area = img[hy:hy + HEART.shape[0], hx:hx + HEART.shape[1]]
         area[HEART] = area[HEART] * (1 - a) + np.array((1, 0.2, 0.35)) * a
 
-    # sparkles on diamonds (4-point stars)
+    # sparkles on diamonds 
     for g, sp in zip(spark_gems, spark_speed):
         a = max(0, np.sin(sp * t)) ** 6
         if a < 0.03:
@@ -212,14 +212,13 @@ def draw_scene(t):
     return np.clip(img, 0, 1)
 
 
-GRID_DARKNESS = 0.35                 # 0 = no grid lines, 1 = fully black lines between cells
-
+GRID_DARKNESS = 0.35                
 
 def dot_matrix(img):
     """Blow every cell up to SCALE x SCALE pixels and draw dark grid lines between cells."""
     big = np.kron(img, np.ones((SCALE, SCALE, 1)))
     tile = np.ones((SCALE, SCALE))
-    tile[0, :] = tile[:, 0] = 1 - GRID_DARKNESS          # one-pixel gap on the top and left of each cell
+    tile[0, :] = tile[:, 0] = 1 - GRID_DARKNESS          # For one-pixel gapping
     return big * np.tile(tile, (H, W))[:, :, None]
 
 
@@ -229,7 +228,7 @@ ax = fig.add_axes([0, 0.07, 1, 0.93])
 ax.axis("off")
 im = ax.imshow(dot_matrix(draw_scene(0)), interpolation="nearest")
 fig.text(0.5, 0.03, "i need to get in .", color="white",
-         fontsize=14, fontweight="bold", ha="center", va="center")
+         fontsize=14, fontweight="bold", ha="center", va="center")                                       # hello elliot
 
 
 def update(frame):
