@@ -1,4 +1,4 @@
-# Man scrolling reels in a cave, diamonds outside  (terminal / ASCII character grid)
+# Man scrolling reels in a cave  (terminal / ASCII character grid)
 # pip install numpy matplotlib
 
 import numpy as np
@@ -224,7 +224,7 @@ def draw_scene(t):
 
 # ---------- ASCII / terminal rendering ----------
 def build_atlas():
-    """Draw every character of CHARS once into a small bitmap (done only at start-up)."""
+    
     atlas = []
     for ch in CHARS:
         f = Figure(figsize=(GW / 100, GH / 100), dpi=100, facecolor="black")
@@ -242,7 +242,7 @@ GLYPHS = ATLAS[CHAR_MAP][..., None]                      # (ROWS, COLS, GH, GW, 
 
 
 def ascii_render(img):
-    """Colour fills the cell, code characters are drawn on top in a brighter shade."""
+   
     cells = img.reshape(ROWS, BY, COLS, BX, 3).mean(axis=(1, 3))          # average colour per character
     cells = cells[:, :, None, None, :]
     fg = np.clip(cells * 1.1 + 0.04, 0, 1)                                # bright character
