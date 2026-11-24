@@ -1,5 +1,5 @@
 # Man scrolling reels in a cave  (terminal / ASCII character grid)
-# pip install numpy matplotlib
+# To run this pip install numpy matplotlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,19 +9,18 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 K = 3                                
-W, H = 160 * K, 100 * K              # scene grid size in cells
+W, H = 160 * K, 100 * K             
 rng = np.random.default_rng(5)
 
 yy, xx = np.mgrid[0:H, 0:W] / K
 
-# ---------- ASCII screen settings ----------
-CHARS = "01010101<>/{}=+;$#"          # characters used on screen (mostly 0 and 1)
-GW, GH = 5, 10                       # size of one character in screen pixels
-BX, BY = 2, 4                        # scene cells covered by one character (twice as tall as wide)
-COLS, ROWS = W // BX, H // BY        # characters across / down (240 x 75 with K = 3)
+CHARS = "01010101<>/{}=+;$#"          
+GW, GH = 5, 10                       
+BX, BY = 2, 4                       
+COLS, ROWS = W // BX, H // BY        
 
 
-# ---------- small helpers ----------
+# helpers 
 def circle(cx, cy, r):
     return (xx - cx) ** 2 + (yy - cy) ** 2 <= r * r
 
@@ -33,7 +32,7 @@ def line(x0, y0, x1, y1, r=1.2):
     u = np.clip(((xx - x0) * dx + (yy - y0) * dy) / (dx * dx + dy * dy), 0, 1)
     return (xx - (x0 + u * dx)) ** 2 + (yy - (y0 + u * dy)) ** 2 <= r * r
 
-def polygon(points):
+def poly(points):
     pts = np.column_stack([xx.ravel(), yy.ravel()])
     return Path(points).contains_points(pts).reshape(H, W)
 
@@ -67,7 +66,7 @@ bg[:] = SKY
 gem_id = np.full((H, W), -1)
 
 
-# ---------- faceted diamond ----------
+# ---------- face diamond ------------
 def draw_gem(i, cx, cy, size, angle, base):
     
     R = size * 1.6
@@ -91,12 +90,12 @@ def draw_gem(i, cx, cy, size, angle, base):
                             [0.95, 1.20, 1.38, 0.95], 0.72)
     pav_shade = np.select([ratio < -0.5, ratio < 0.0, ratio < 0.5], [1.12, 1.30, 0.85], 0.62)
     shade = np.where(crown, crown_shade, pav_shade)
-    shade = shade * (1.12 - 0.22 * (v + 1) / 2)             # lighter on top, darker at the tip
+    shade = shade * (1.12 - 0.22 * (v + 1) / 2)
 
     colour = np.array(base)[None, None, :] * shade[:, :, None]
     colour[(v > -0.46) & (v < -0.36) & body] = np.array((0.85, 0.97, 1.0))   # bright girdle band
 
-    # thin facet edges
+    # thin edges
     thr = 0.5 / (K * size)
     edges = np.zeros_like(body)
     for b in (-0.55, -0.2, 0.2, 0.55):
@@ -110,7 +109,7 @@ def draw_gem(i, cx, cy, size, angle, base):
              ((v >= -0.4) & (v <= 1 - 0.7 / size) & (abs(u) <= wp - 0.55 / size)))
     colour[body & ~inner] = (0.05, 0.13, 0.30)
 
-    # shiny glints
+    # shiny sparks
     for gu, gv, gr in ((-0.28, -0.80, 0.13), (0.22, -0.62, 0.07), (-0.35, 0.05, 0.07)):
         colour[((u - gu) ** 2 + (v - gv) ** 2 < gr * gr) & body & inner] = (1, 1, 1)
 
@@ -119,15 +118,14 @@ def draw_gem(i, cx, cy, size, angle, base):
     gem_id[y0:y1, x0:x1][body] = i
 
 
-# ---------- static background ----------
-rock = polygon([(-2, 102), (-2, 44), (14, 36), (38, 34), (60, 38), (68, 52), (70, 72), (66, 88), (74, 96), (74, 102)])
-inside = polygon([(-2, 52), (40, 48), (54, 52), (56, 66), (56, 92), (-2, 92)])
+rock = poly([(-2, 102), (-2, 44), (14, 36), (38, 34), (60, 38), (68, 52), (70, 72), (66, 88), (74, 96), (74, 102)])
+inside = poly([(-2, 52), (40, 48), (54, 52), (56, 66), (56, 92), (-2, 92)])
 
 gem_centers = []
 for gx in np.arange(0, 160, 9.5):
     for gy in np.arange(0, 100, 9.5):
         cx, cy = gx + rng.uniform(-3.5, 3.5), gy + rng.uniform(-3.5, 3.5)
-        if cx < 76 and cy > 32:                          # keep the cave area empty
+        if cx < 76 and cy > 32:                          # To keep the cave area empty
             continue
         size, angle = rng.uniform(4.2, 6.2), rng.uniform(-0.5, 0.5)
         draw_gem(len(gem_centers), cx, cy, size, angle, GEM_COLOURS[rng.integers(len(GEM_COLOURS))])
@@ -149,7 +147,7 @@ bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # a
 bg[line(35, 72, 46, 78, 1.5)] = (0.3, 0.3, 0.34)
 bg[rect(19, 80, 23, 91) | rect(25, 80, 29, 91)] = (0.08, 0.08, 0.1)          # legs
 bg[rect(18, 91, 23, 92) | rect(25, 91, 30, 92)] = (0, 0, 0)                  # shoes
-bg[polygon([(17, 64), (31, 64), (32, 80), (16, 80)])] = HOODIE               # hoodie
+bg[poly([(17, 64), (31, 64), (32, 80), (16, 80)])] = HOODIE               # hoodie
 bg[circle(24, 56, 8)] = (0.40, 0.40, 0.45)                                   # hood
 bg[line(17, 66, 18, 74, 1.6) | line(18, 74, 21, 74, 1.6)] = HOODIE           # arms
 bg[line(31, 66, 30, 74, 1.6) | line(30, 74, 27, 74, 1.6)] = HOODIE
@@ -171,7 +169,7 @@ def draw_scene(t):
     shade = 0.92 + 0.12 * np.sin(2 * t + gem_phase)
     img *= np.where(gem_id >= 0, shade[gem_id.clip(0)], 1.0)[:, :, None]
 
-    # blue, red light, flickering
+    # blue, red light
     mix = 0.5 + 0.5 * np.sin(2 * np.pi * t / 1.5)
     light = BLUE * (1 - mix) + RED * mix
     flicker = 0.7 + 0.3 * np.sin(2 * np.pi * 4 * t) ** 2
@@ -222,7 +220,7 @@ def draw_scene(t):
     return np.clip(img, 0, 1)
 
 
-# ---------- ASCII / terminal rendering ----------
+# ---------- ASCII / terminal ----------
 def build_atlas():
     
     atlas = []
@@ -233,20 +231,20 @@ def build_atlas():
                fontweight="bold", ha="center", va="center")
         canvas.draw()
         atlas.append(np.asarray(canvas.buffer_rgba())[:GH, :GW, 0] / 255.0)
-    return np.array(atlas)                               # (characters, GH, GW)
+    return np.array(atlas)                              
 
 ATLAS = build_atlas()
-# each screen position keeps the same character forever, so only the colours animate (no flicker noise)
+
 CHAR_MAP = np.random.default_rng(11).integers(0, len(CHARS), (ROWS, COLS))
-GLYPHS = ATLAS[CHAR_MAP][..., None]                      # (ROWS, COLS, GH, GW, 1)
+GLYPHS = ATLAS[CHAR_MAP][..., None]                      
 
 
 def ascii_render(img):
    
-    cells = img.reshape(ROWS, BY, COLS, BX, 3).mean(axis=(1, 3))          # average colour per character
+    cells = img.reshape(ROWS, BY, COLS, BX, 3).mean(axis=(1, 3))         
     cells = cells[:, :, None, None, :]
-    fg = np.clip(cells * 1.1 + 0.04, 0, 1)                                # bright character
-    back = cells * 0.62                                                   # darker fill behind it
+    fg = np.clip(cells * 1.1 + 0.04, 0, 1)                                
+    back = cells * 0.62                                                   
     out = back * (1 - GLYPHS) + fg * GLYPHS
     return out.transpose(0, 2, 1, 3, 4).reshape(ROWS * GH, COLS * GW, 3)
 
