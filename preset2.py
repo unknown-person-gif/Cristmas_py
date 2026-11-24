@@ -1,5 +1,5 @@
 # Man scrolling reels in a cave 
-# pip install numpy matplotlib
+# for pip install numpy matplotlib :)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,16 +7,12 @@ from matplotlib.path import Path
 from matplotlib.animation import FuncAnimation                                          # WHAT ARE YOU LOOKING FOR :XD
 
 K = 3                                
-SCALE = 6 // K                       # screen pixels per grid cell
-W, H = 160 * K, 100 * K              # grid size in cells
+SCALE = 6 // K                       
+W, H = 160 * K, 100 * K              
 rng = np.random.default_rng(5)
-
-# every position below is written in the "old" 160 x 100 units, so changing K
 
 yy, xx = np.mgrid[0:H, 0:W] / K                         
 
-
-# ---------- small helpers ----------
 def circle(cx, cy, r):
     return (xx - cx) ** 2 + (yy - cy) ** 2 <= r * r
 
@@ -46,7 +42,6 @@ def smooth(x):
     x = np.clip(x, 0, 1)
     return x * x * (3 - 2 * x)
 
-
 # ---------- colours ----------
 SKY = (0.70, 0.92, 0.96)
 BROWN, DARK_BROWN = (0.62, 0.36, 0.16), (0.30, 0.15, 0.06)
@@ -61,10 +56,7 @@ bg = np.zeros((H, W, 3))
 bg[:] = SKY
 gem_id = np.full((H, W), -1)
 
-
-# ---------- pixel-art diamonds ----------
-# o = outline, w = white shine, l = light, b = base, d = dark, . = empty
-# one character = one pixel 
+#---for diamonds ---
 SPRITES = [
     [  # big diamond
         "..oooooo..",
@@ -89,12 +81,11 @@ OUTLINE = np.array((0.05, 0.13, 0.30))
 
 
 def draw_gem(i, cx, cy, sprite, base):
-    """Stamp a pixel-art sprite centred on (cx, cy); each sprite pixel is K x K grid cells."""
     base = np.array(base)
     pal = {"o": OUTLINE, "w": np.array((1.0, 1.0, 1.0)), "l": np.clip(base * 1.25, 0, 1),
            "b": base, "d": base * 0.68}
     h, w = len(sprite), len(sprite[0])
-    ox, oy = int(round(cx - w / 2)) * K, int(round(cy - h / 2)) * K     # For snap to the pixel grid
+    ox, oy = int(round(cx - w / 2)) * K, int(round(cy - h / 2)) * K     
     for r, row in enumerate(sprite):
         for c, ch in enumerate(row):
             if ch == ".":
@@ -106,18 +97,16 @@ def draw_gem(i, cx, cy, sprite, base):
             bg[ya0:ya1, xa0:xa1] = pal[ch]
             gem_id[ya0:ya1, xa0:xa1] = i
 
-
-# ---------- static background ----------
 rock = polygon([(-2, 102), (-2, 44), (14, 36), (38, 34), (60, 38), (68, 52), (70, 72), (66, 88), (74, 96), (74, 102)])
 inside = polygon([(-2, 52), (40, 48), (54, 52), (56, 66), (56, 92), (-2, 92)])
 
 gem_centers = []
 for gx in np.arange(4, 160, 12):
     for gy in np.arange(4, 100, 12):
-        if rng.random() < 0.15:                              # For random gaps
+        if rng.random() < 0.15:                             
             continue
         cx, cy = gx + rng.uniform(-2, 2), gy + rng.uniform(-2, 2)
-        if cx < 80 and cy > 28:                              # keep the cave area empty
+        if cx < 80 and cy > 28:                              
             continue
         sprite = SPRITES[0] if rng.random() < 0.65 else SPRITES[1]
         draw_gem(len(gem_centers), cx, cy, sprite, GEM_COLOURS[rng.integers(len(GEM_COLOURS))])
@@ -134,7 +123,7 @@ bg[outline(inside, 1.0)] = DARK_BROWN
 for px, py in [(46, 90), (49, 89), (43, 91)]:
     bg[circle(px, py, 1.5)] = (0.55, 0.32, 0.14)
 
-# man 
+# Completee man 
 bg[line(40, 76, 33, 91, 1.0)] = (0.35, 0.2, 0.08)                            # axe
 bg[line(35, 72, 46, 78, 1.5)] = (0.3, 0.3, 0.34)
 bg[rect(19, 80, 23, 91) | rect(25, 80, 29, 91)] = (0.08, 0.08, 0.1)          # legs
@@ -215,7 +204,6 @@ def draw_scene(t):
 GRID_DARKNESS = 0.35                
 
 def dot_matrix(img):
-    """Blow every cell up to SCALE x SCALE pixels and draw dark grid lines between cells."""
     big = np.kron(img, np.ones((SCALE, SCALE, 1)))
     tile = np.ones((SCALE, SCALE))
     tile[0, :] = tile[:, 0] = 1 - GRID_DARKNESS          # For one-pixel gapping
