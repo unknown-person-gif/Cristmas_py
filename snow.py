@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
-# Screen settings
+# Screen settings var declarations :)
 W, H = 170, 100
 GROUND = 78
 TOTAL_SNOW = 350
