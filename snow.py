@@ -304,7 +304,7 @@ def update(frame):
     return (image,)
 
 
-animation = FuncAnimation(
+animation = FuncAnimation(                                                       #HELLO LOOKING SOMETHING INTRESTING HERE ?
     fig,
     update,
     frames=160,
@@ -313,7 +313,7 @@ animation = FuncAnimation(
 )
 
 
-# Save as GIF or show the animation
+# For Saving it as GIF or show the animation
 if "--save" in sys.argv:
     animation.save(
         "snow_globe.gif",
